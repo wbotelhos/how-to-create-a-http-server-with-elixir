@@ -28,7 +28,11 @@ defmodule HttpServer do
     |> write_response(client_socket)
   end
 
-  def create_response(_request) do
+  def create_response(request) do
+    if String.match?(request, ~r{GET /error}) do
+      raise(request)
+    end
+
     body = "Hello HTTP Server!"
 
     """
