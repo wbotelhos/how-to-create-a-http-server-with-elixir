@@ -18,6 +18,8 @@ defmodule HttpServer do
 
     IO.puts("Processing at PID: #{inspect(pid)}\n")
 
+    :ok = :gen_tcp.controlling_process(client_socket, pid)
+
     accept_connection(listen_socket)
   end
 
