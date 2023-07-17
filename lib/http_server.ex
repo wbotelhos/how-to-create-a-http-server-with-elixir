@@ -2,25 +2,27 @@ defmodule HttpServer do
   def start(port) do
     {:ok, listen_socket} = :gen_tcp.listen(port, [:binary, packet: :raw, active: false, reuseaddr: true])
 
-    IO.puts("Server running on #{port}...\n")
+    IO.puts("[#{inspect(self())}] Server running on #{port}...\n")
 
     accept_connection(listen_socket)
   end
 
   def accept_connection(listen_socket) do
-    IO.puts("Waiting for connection...\n")
+    IO.puts("[#{inspect(self())}] Waiting for connection...\n")
 
     {:ok, client_socket} = :gen_tcp.accept(listen_socket)
 
-    IO.puts("Connection accepted!\n")
+    IO.puts("[#{inspect(self())}] Connection accepted!\n")
 
-    process_request(client_socket)
+    pid = spawn(fn -> process_request(client_socket) end)
+
+    IO.puts("Processing at PID: #{inspect(pid)}\n")
 
     accept_connection(listen_socket)
   end
 
   def process_request(client_socket) do
-    IO.puts("Processing request...\n")
+    IO.puts("[#{inspect(self())}] Processing request...\n")
 
     client_socket
     |> read_request
@@ -53,7 +55,7 @@ defmodule HttpServer do
   def write_response(response, client_socket) do
     :ok = :gen_tcp.send(client_socket, response)
 
-    IO.puts("Response:\n\n#{response}\n")
+    IO.puts("[#{inspect(self())}] Response:\n\n#{response}\n")
 
     :gen_tcp.close(client_socket)
   end
